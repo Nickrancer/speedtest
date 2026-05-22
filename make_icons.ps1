@@ -1,12 +1,70 @@
-$pngBytes = [byte[]](0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x00,0x00,0x0D,0x49,0x48,0x44,0x52,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x08,0x02,0x00,0x00,0x00,0x90,0x77,0x53,0xDE,0x00,0x00,0x00,0x0C,0x49,0x44,0x41,0x54,0x08,0xD7,0x63,0x60,0x60,0xF8,0x0F,0x00,0x00,0x11,0x00,0x01,0x83,0x5D,0xEF,0xD1,0x00,0x00,0x00,0x00,0x49,0x45,0x4E,0x44,0xAE,0x42,0x60,0x82)
+Add-Type -AssemblyName System.Drawing
 
-$folders = @("mipmap-mdpi","mipmap-hdpi","mipmap-xhdpi","mipmap-xxhdpi","mipmap-xxxhdpi")
+$icons = @(
+    @{size=48;  folder="mipmap-mdpi"},
+    @{size=72;  folder="mipmap-hdpi"},
+    @{size=96;  folder="mipmap-xhdpi"},
+    @{size=144; folder="mipmap-xxhdpi"},
+    @{size=192; folder="mipmap-xxxhdpi"}
+)
 
-foreach ($folder in $folders) {
-    $dir = "d:\speedtest\app\src\main\res\" + $folder
-    New-Item -ItemType Directory -Force -Path $dir | Out-Null
-    [System.IO.File]::WriteAllBytes("$dir\ic_launcher.png", $pngBytes)
-    [System.IO.File]::WriteAllBytes("$dir\ic_launcher_round.png", $pngBytes)
-    Write-Host "Created $folder"
+foreach ($icon in $icons) {
+    $size = $icon.size
+    $folder = $icon.folder
+    $dir = "d:\speedtest\app\src\main\res\$folder"
+
+    $bmp = New-Object System.Drawing.Bitmap($size, $size)
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+    $g.Clear([System.Drawing.Color]::FromArgb(10, 14, 26))  # Dark bg
+
+    # Outer glow ring
+    $penGlow = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(60, 0, 180, 255), [float]($size * 0.06))
+    $margin = [int]($size * 0.08)
+    $g.DrawEllipse($penGlow, $margin, $margin, $size - 2*$margin, $size - 2*$margin)
+
+    # Blue outer ring
+    $penRing = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(0, 153, 255), [float]($size * 0.04))
+    $margin2 = [int]($size * 0.1)
+    $g.DrawEllipse($penRing, $margin2, $margin2, $size - 2*$margin2, $size - 2*$margin2)
+
+    # Speed arc (cyan, 150 to 300 degrees sweep)
+    $penArc = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(0, 229, 255), [float]($size * 0.05))
+    $penArc.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
+    $penArc.EndCap   = [System.Drawing.Drawing2D.LineCap]::Round
+    $margin3 = [int]($size * 0.15)
+    $g.DrawArc($penArc, $margin3, $margin3, $size - 2*$margin3, $size - 2*$margin3, 150, 180)
+
+    # Needle line
+    $cx = $size / 2.0
+    $cy = $size / 2.0
+    $needleLen = $size * 0.32
+    $angleRad = 240 * [Math]::PI / 180
+    $ex = $cx + $needleLen * [Math]::Cos($angleRad)
+    $ey = $cy + $needleLen * [Math]::Sin($angleRad)
+    $penNeedle = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(0, 229, 255), [float]($size * 0.03))
+    $penNeedle.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
+    $penNeedle.EndCap   = [System.Drawing.Drawing2D.LineCap]::Round
+    $g.DrawLine($penNeedle, [float]$cx, [float]$cy, [float]$ex, [float]$ey)
+
+    # Center dot
+    $dotR = $size * 0.07
+    $brushDot = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(0, 229, 255))
+    $g.FillEllipse($brushDot, [float]($cx - $dotR), [float]($cy - $dotR), [float](2*$dotR), [float](2*$dotR))
+
+    # Inner dark dot
+    $dotR2 = $size * 0.035
+    $brushInner = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(10, 14, 26))
+    $g.FillEllipse($brushInner, [float]($cx - $dotR2), [float]($cy - $dotR2), [float](2*$dotR2), [float](2*$dotR2))
+
+    $g.Dispose()
+
+    # Save both normal and round icons
+    $bmp.Save("$dir\ic_launcher.png", [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Save("$dir\ic_launcher_round.png", [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Dispose()
+
+    Write-Host "Created $folder ($size x $size)"
 }
-Write-Host "Done!"
+
+Write-Host "All icons generated successfully!"

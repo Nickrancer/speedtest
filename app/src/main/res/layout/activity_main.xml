@@ -30,7 +30,7 @@
                 android:text="SpeedTest"
                 android:textColor="@color/text_primary"
                 android:textSize="22sp"
-                android:fontFamily="@font/inter_bold"
+                android:textStyle="bold"
                 android:letterSpacing="0.05" />
 
             <TextView
@@ -124,26 +124,6 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="8dp" />
 
-        <!-- Current speed label -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:paddingBottom="4dp">
-
-            <TextView
-                android:id="@+id/tvCurrentSpeed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0.0"
-                android:textColor="@color/text_primary"
-                android:textSize="52sp"
-                android:fontFamily="@font/inter_bold"
-                android:visibility="gone"
-                tools:visibility="visible" />
-        </LinearLayout>
-
         <!-- Status text -->
         <TextView
             android:id="@+id/tvStatus"
@@ -154,6 +134,18 @@
             android:textSize="14sp"
             android:gravity="center"
             android:paddingVertical="4dp" />
+
+        <!-- Current speed readout -->
+        <TextView
+            android:id="@+id/tvCurrentSpeed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0.0"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <!-- Progress bar -->
         <ProgressBar
@@ -179,7 +171,7 @@
             android:text="START"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
-            android:fontFamily="@font/inter_bold"
+            android:textStyle="bold"
             android:letterSpacing="0.1"
             android:background="@drawable/btn_start_bg"
             android:elevation="8dp"
@@ -218,7 +210,7 @@
                     android:text="—"
                     android:textColor="@color/accent_cyan"
                     android:textSize="22sp"
-                    android:fontFamily="@font/inter_bold"
+                    android:textStyle="bold"
                     tools:text="12ms" />
                 <TextView
                     android:id="@+id/tvJitter"
@@ -255,7 +247,7 @@
                     android:text="—"
                     android:textColor="@color/accent_blue"
                     android:textSize="22sp"
-                    android:fontFamily="@font/inter_bold"
+                    android:textStyle="bold"
                     tools:text="245.8" />
                 <TextView
                     android:layout_width="wrap_content"
@@ -290,7 +282,7 @@
                     android:text="—"
                     android:textColor="@color/accent_purple"
                     android:textSize="22sp"
-                    android:fontFamily="@font/inter_bold"
+                    android:textStyle="bold"
                     tools:text="89.3" />
                 <TextView
                     android:layout_width="wrap_content"
@@ -321,7 +313,7 @@
                 android:text="🚀 EXCELLENT"
                 android:textColor="@color/accent_cyan"
                 android:textSize="18sp"
-                android:fontFamily="@font/inter_bold"
+                android:textStyle="bold"
                 android:gravity="center"
                 android:paddingBottom="12dp" />
 

@@ -15,6 +15,11 @@ class SpeedometerView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    init {
+        // Must be set once at construction time, not inside onDraw
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
+    }
+
     private val maxSpeed = 1000f
     private var currentSpeed = 0f
     private var animatedAngle = START_ANGLE
@@ -103,7 +108,6 @@ class SpeedometerView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
 
         val cx = width / 2f
         val cy = height / 2f
