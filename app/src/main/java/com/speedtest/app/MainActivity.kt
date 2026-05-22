@@ -4,18 +4,23 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.android.gms.ads.nativead.MediaView
+import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.gms.ads.nativead.NativeAdOptions
+import com.google.android.gms.ads.nativead.NativeAdView
 import com.speedtest.app.databinding.ActivityMainBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -26,13 +31,11 @@ class MainActivity : AppCompatActivity() {
     private val engine = SpeedTestEngine()
     private var testJob: Job? = null
     private var isTesting = false
+    private var currentNativeAd: NativeAd? = null
 
-    // ── AdMob ──────────────────────────────────────────────────────────────────
-    // TODO: Replace these test IDs with your real IDs from https://apps.admob.com
-    // Test IDs are safe to use during development — they show real test ads
-    private val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
-    private var interstitialAd: InterstitialAd? = null
-    private var testCompletedCount = 0  // Show interstitial every 2 completed tests
+    // ── AdMob Unit IDs ─────────────────────────────────────────────────────────
+    private val BANNER_AD_UNIT_ID         = "ca-app-pub-6649164620167182/2457345781"
+    private val NATIVE_ADVANCED_AD_UNIT_ID = "ca-app-pub-6649164620167182/6714257786"
 
     enum class TestPhase { IDLE, PING, DOWNLOAD, UPLOAD, DONE }
     private var currentPhase = TestPhase.IDLE
@@ -47,55 +50,81 @@ class MainActivity : AppCompatActivity() {
         checkNetworkAndUpdateUI()
     }
 
-    // ── AdMob Init ─────────────────────────────────────────────────────────────
+    // ── AdMob ──────────────────────────────────────────────────────────────────
 
     private fun initAdMob() {
         MobileAds.initialize(this) {
-            // SDK initialized — load banner and pre-load interstitial
             loadBannerAd()
-            loadInterstitialAd()
         }
     }
 
     private fun loadBannerAd() {
-        val adRequest = AdRequest.Builder().build()
-        binding.adBanner.loadAd(adRequest)
+        binding.adBanner.loadAd(AdRequest.Builder().build())
     }
 
-    private fun loadInterstitialAd() {
-        val adRequest = AdRequest.Builder().build()
-        InterstitialAd.load(
-            this,
-            INTERSTITIAL_AD_UNIT_ID,
-            adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(ad: InterstitialAd) {
-                    interstitialAd = ad
-                    interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
-                        override fun onAdDismissedFullScreenContent() {
-                            interstitialAd = null
-                            loadInterstitialAd()  // Pre-load next one immediately
-                        }
-                        override fun onAdFailedToShowFullScreenContent(e: AdError) {
-                            interstitialAd = null
-                            loadInterstitialAd()
-                        }
-                    }
-                }
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    interstitialAd = null
-                    // Retry silently — no need to bother the user
-                }
+    /** Load a Native Advanced ad and show it in nativeAdContainer */
+    private fun loadAndShowNativeAd() {
+        val adLoader = AdLoader.Builder(this, NATIVE_ADVANCED_AD_UNIT_ID)
+            .forNativeAd { nativeAd ->
+                // Destroy old ad if we have one
+                currentNativeAd?.destroy()
+                currentNativeAd = nativeAd
+                renderNativeAd(nativeAd)
             }
-        )
+            .withAdListener(object : com.google.android.gms.ads.AdListener() {
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    binding.nativeAdContainer.visibility = View.GONE
+                }
+            })
+            .withNativeAdOptions(NativeAdOptions.Builder().build())
+            .build()
+
+        adLoader.loadAd(AdRequest.Builder().build())
     }
 
-    private fun maybeShowInterstitial() {
-        testCompletedCount++
-        // Show interstitial every 2 completed tests (not every single one — better UX)
-        if (testCompletedCount % 2 == 0 && interstitialAd != null) {
-            interstitialAd?.show(this)
+    private fun renderNativeAd(nativeAd: NativeAd) {
+        val adView = LayoutInflater.from(this)
+            .inflate(R.layout.native_ad_view, binding.nativeAdContainer, false) as NativeAdView
+
+        // Wire each view to the NativeAdView
+        adView.headlineView   = adView.findViewById<TextView>(R.id.ad_headline).also {
+            it.text = nativeAd.headline
         }
+        adView.bodyView       = adView.findViewById<TextView>(R.id.ad_body).also {
+            it.text = nativeAd.body
+            it.visibility = if (nativeAd.body != null) View.VISIBLE else View.GONE
+        }
+        adView.advertiserView = adView.findViewById<TextView>(R.id.ad_advertiser).also {
+            it.text = nativeAd.advertiser
+            it.visibility = if (nativeAd.advertiser != null) View.VISIBLE else View.GONE
+        }
+        adView.iconView       = adView.findViewById<ImageView>(R.id.ad_app_icon).also {
+            if (nativeAd.icon != null) {
+                it.setImageDrawable(nativeAd.icon?.drawable)
+                it.visibility = View.VISIBLE
+            } else {
+                it.visibility = View.GONE
+            }
+        }
+        adView.mediaView      = adView.findViewById<MediaView>(R.id.ad_media).also {
+            adView.mediaView = it
+        }
+        adView.callToActionView = adView.findViewById<Button>(R.id.ad_call_to_action).also {
+            it.text = nativeAd.callToAction
+            it.visibility = if (nativeAd.callToAction != null) View.VISIBLE else View.GONE
+        }
+
+        // Register the native ad — MUST be called after all views are wired
+        adView.setNativeAd(nativeAd)
+
+        // Display in container
+        binding.nativeAdContainer.removeAllViews()
+        binding.nativeAdContainer.addView(adView)
+        binding.nativeAdContainer.visibility = View.VISIBLE
+
+        val anim = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
+        anim.duration = 400
+        binding.nativeAdContainer.startAnimation(anim)
     }
 
     // ── UI Setup ───────────────────────────────────────────────────────────────
@@ -161,8 +190,8 @@ class MainActivity : AppCompatActivity() {
                         binding.speedometer.setSpeed(0f)
                     }
                     binding.speedometer.setSpeed(speedMbps)
-                    binding.tvCurrentSpeed.text = String.format("%.1f Mbps", speedMbps)
-                    binding.tvUpload.text       = String.format("%.1f", speedMbps)
+                    binding.tvCurrentSpeed.text  = String.format("%.1f Mbps", speedMbps)
+                    binding.tvUpload.text        = String.format("%.1f", speedMbps)
                     binding.progressBar.progress = 50 + progressPercent / 2
                 }
 
@@ -228,8 +257,8 @@ class MainActivity : AppCompatActivity() {
 
         showRating(result.downloadSpeed)
 
-        // Show interstitial ad after test completes
-        maybeShowInterstitial()
+        // Show native ad after results appear
+        loadAndShowNativeAd()
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
@@ -274,9 +303,10 @@ class MainActivity : AppCompatActivity() {
         binding.tvServerName.text = "Detecting..."
         binding.tvAsn.visibility  = View.GONE
         binding.tvRating.text     = ""
-        binding.cardResults.visibility    = View.GONE
-        binding.progressBar.progress      = 0
-        binding.tvCurrentSpeed.visibility = View.GONE
+        binding.cardResults.visibility     = View.GONE
+        binding.nativeAdContainer.visibility = View.GONE
+        binding.progressBar.progress       = 0
+        binding.tvCurrentSpeed.visibility  = View.GONE
     }
 
     private fun isNetworkAvailable(): Boolean {
@@ -304,6 +334,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        currentNativeAd?.destroy()
         engine.cancel()
         testJob?.cancel()
     }

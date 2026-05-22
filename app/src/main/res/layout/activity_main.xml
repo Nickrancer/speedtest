@@ -418,6 +418,15 @@
 
         </LinearLayout>
 
+        <!-- ── Native Advanced Ad (loads after test completes) ── -->
+        <FrameLayout
+            android:id="@+id/nativeAdContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
         <!-- ── AdMob Banner Ad ── -->
         <com.google.android.gms.ads.AdView
             xmlns:ads="http://schemas.android.com/apk/res-auto"
@@ -427,7 +436,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp"
             ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-3940256099942544/6300978111" />
+            ads:adUnitId="ca-app-pub-6649164620167182/2457345781" />
         <!-- ↑ Replace adUnitId with your real Banner Ad Unit ID from AdMob -->
 
     </LinearLayout>
