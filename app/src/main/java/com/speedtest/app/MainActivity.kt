@@ -9,6 +9,13 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.speedtest.app.databinding.ActivityMainBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -20,6 +27,13 @@ class MainActivity : AppCompatActivity() {
     private var testJob: Job? = null
     private var isTesting = false
 
+    // ── AdMob ──────────────────────────────────────────────────────────────────
+    // TODO: Replace these test IDs with your real IDs from https://apps.admob.com
+    // Test IDs are safe to use during development — they show real test ads
+    private val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
+    private var interstitialAd: InterstitialAd? = null
+    private var testCompletedCount = 0  // Show interstitial every 2 completed tests
+
     enum class TestPhase { IDLE, PING, DOWNLOAD, UPLOAD, DONE }
     private var currentPhase = TestPhase.IDLE
 
@@ -27,9 +41,64 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        initAdMob()
         setupUI()
         checkNetworkAndUpdateUI()
     }
+
+    // ── AdMob Init ─────────────────────────────────────────────────────────────
+
+    private fun initAdMob() {
+        MobileAds.initialize(this) {
+            // SDK initialized — load banner and pre-load interstitial
+            loadBannerAd()
+            loadInterstitialAd()
+        }
+    }
+
+    private fun loadBannerAd() {
+        val adRequest = AdRequest.Builder().build()
+        binding.adBanner.loadAd(adRequest)
+    }
+
+    private fun loadInterstitialAd() {
+        val adRequest = AdRequest.Builder().build()
+        InterstitialAd.load(
+            this,
+            INTERSTITIAL_AD_UNIT_ID,
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    interstitialAd = ad
+                    interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+                        override fun onAdDismissedFullScreenContent() {
+                            interstitialAd = null
+                            loadInterstitialAd()  // Pre-load next one immediately
+                        }
+                        override fun onAdFailedToShowFullScreenContent(e: AdError) {
+                            interstitialAd = null
+                            loadInterstitialAd()
+                        }
+                    }
+                }
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    interstitialAd = null
+                    // Retry silently — no need to bother the user
+                }
+            }
+        )
+    }
+
+    private fun maybeShowInterstitial() {
+        testCompletedCount++
+        // Show interstitial every 2 completed tests (not every single one — better UX)
+        if (testCompletedCount % 2 == 0 && interstitialAd != null) {
+            interstitialAd?.show(this)
+        }
+    }
+
+    // ── UI Setup ───────────────────────────────────────────────────────────────
 
     private fun setupUI() {
         binding.btnStart.setOnClickListener {
@@ -64,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                         .filter { it.isNotBlank() }.joinToString(", ")
                     binding.tvServerName.text = location.ifBlank { "Unknown" }
                     if (info.asn.isNotBlank()) {
-                        binding.tvAsn.text    = info.asn
+                        binding.tvAsn.text       = info.asn
                         binding.tvAsn.visibility = View.VISIBLE
                     }
                     binding.tvStatus.text = "Measuring ping..."
@@ -79,10 +148,10 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onDownloadProgress(speedMbps: Float, progressPercent: Int) {
                     binding.speedometer.setSpeed(speedMbps)
-                    binding.tvCurrentSpeed.text = String.format("%.1f", speedMbps)
+                    binding.tvCurrentSpeed.text       = String.format("%.1f Mbps", speedMbps)
                     binding.tvCurrentSpeed.visibility = View.VISIBLE
-                    binding.tvDownload.text = String.format("%.1f", speedMbps)
-                    binding.progressBar.progress = progressPercent / 2
+                    binding.tvDownload.text           = String.format("%.1f", speedMbps)
+                    binding.progressBar.progress      = progressPercent / 2
                 }
 
                 override fun onUploadProgress(speedMbps: Float, progressPercent: Int) {
@@ -92,8 +161,8 @@ class MainActivity : AppCompatActivity() {
                         binding.speedometer.setSpeed(0f)
                     }
                     binding.speedometer.setSpeed(speedMbps)
-                    binding.tvCurrentSpeed.text = String.format("%.1f", speedMbps)
-                    binding.tvUpload.text = String.format("%.1f", speedMbps)
+                    binding.tvCurrentSpeed.text = String.format("%.1f Mbps", speedMbps)
+                    binding.tvUpload.text       = String.format("%.1f", speedMbps)
                     binding.progressBar.progress = 50 + progressPercent / 2
                 }
 
@@ -141,27 +210,29 @@ class MainActivity : AppCompatActivity() {
         binding.progressBar.progress = 100
         binding.tvCurrentSpeed.visibility = View.GONE
 
-        // Final values
         binding.tvPing.text     = "${result.ping}ms"
         binding.tvJitter.text   = "±${result.jitter}ms"
         binding.tvDownload.text = String.format("%.1f", result.downloadSpeed)
         binding.tvUpload.text   = String.format("%.1f", result.uploadSpeed)
 
-        // Network info
         binding.tvIpAddress.text  = result.networkInfo.publicIp
         binding.tvIspName.text    = result.networkInfo.isp
         val location = listOf(result.networkInfo.city, result.networkInfo.country)
             .filter { it.isNotBlank() }.joinToString(", ")
         binding.tvServerName.text = location.ifBlank { "Unknown" }
 
-        // Show results card with animation
         binding.cardResults.visibility = View.VISIBLE
         val anim = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
         anim.duration = 500
         binding.cardResults.startAnimation(anim)
 
         showRating(result.downloadSpeed)
+
+        // Show interstitial ad after test completes
+        maybeShowInterstitial()
     }
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
 
     private fun showRating(mbps: Float) {
         val (rating, color) = when {
@@ -203,8 +274,8 @@ class MainActivity : AppCompatActivity() {
         binding.tvServerName.text = "Detecting..."
         binding.tvAsn.visibility  = View.GONE
         binding.tvRating.text     = ""
-        binding.cardResults.visibility = View.GONE
-        binding.progressBar.progress   = 0
+        binding.cardResults.visibility    = View.GONE
+        binding.progressBar.progress      = 0
         binding.tvCurrentSpeed.visibility = View.GONE
     }
 

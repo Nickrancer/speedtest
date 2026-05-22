@@ -14,6 +14,7 @@ coroutines = "1.8.1"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 gson = "2.11.0"
+admob = "23.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +31,7 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+admob = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "admob" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
