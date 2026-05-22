@@ -5,40 +5,36 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Outer ring -->
+    <!-- Outer ring (circle as path: center 54,54 radius 38) -->
     <path
-        android:pathData="M54,54 m-38,0 a38,38 0 1,0 76,0 a38,38 0 1,0 -76,0"
-        android:strokeColor="#0099FF"
-        android:strokeWidth="3"
-        android:fillColor="#00000000" />
+        android:pathData="M16,54 A38,38 0 1,0 92,54 A38,38 0 1,0 16,54 Z
+                          M18,54 A36,36 0 1,1 90,54 A36,36 0 1,1 18,54 Z"
+        android:fillColor="#0099FF" />
 
-    <!-- Speed arc -->
+    <!-- Speed arc (partial arc ~150° to 330°, drawn as thick path) -->
     <path
-        android:pathData="M23,65 A35,35 0 0,1 54,19"
+        android:pathData="M24.5,72 A33,33 0 1,1 83.5,72"
         android:strokeColor="#00E5FF"
         android:strokeWidth="5"
         android:fillColor="#00000000"
         android:strokeLineCap="round" />
 
-    <!-- Needle -->
+    <!-- Needle line from center (54,54) toward upper-left ~240° -->
     <path
         android:pathData="M54,54 L35,28"
         android:strokeColor="#00E5FF"
-        android:strokeWidth="3"
+        android:strokeWidth="3.5"
         android:fillColor="#00000000"
         android:strokeLineCap="round" />
 
-    <!-- Center dot -->
-    <circle
-        android:cx="54"
-        android:cy="54"
-        android:r="5"
+    <!-- Center dot (circle as path: center 54,54 radius 5) -->
+    <path
+        android:pathData="M49,54 A5,5 0 1,0 59,54 A5,5 0 1,0 49,54 Z"
         android:fillColor="#00E5FF" />
 
-    <!-- Inner dot -->
-    <circle
-        android:cx="54"
-        android:cy="54"
-        android:r="2.5"
+    <!-- Inner dark dot (circle as path: center 54,54 radius 2.5) -->
+    <path
+        android:pathData="M51.5,54 A2.5,2.5 0 1,0 56.5,54 A2.5,2.5 0 1,0 51.5,54 Z"
         android:fillColor="#0A0E1A" />
+
 </vector>
