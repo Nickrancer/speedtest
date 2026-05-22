@@ -23,7 +23,7 @@ on:
 
 env:
   JAVA_VERSION: '17'
-  GRADLE_VERSION: '8.7'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ─────────────────────────────────────────────
@@ -65,7 +65,7 @@ jobs:
 
       # 5. Validate Gradle wrapper
       - name: ✅ Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v3
+        uses: gradle/actions/wrapper-validation@v4
 
       # 6. Install Android SDK components
       - name: 📱 Set up Android SDK
@@ -145,7 +145,7 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-      # 14. Get APK info and create build summary
+      # 14. Build Summary
       - name: 📋 Build Summary
         run: |
           APK_PATH=$(find . -name "*.apk" -not -path "*/intermediates/*" | head -1)
@@ -167,7 +167,7 @@ jobs:
           fi
 
   # ─────────────────────────────────────────────
-  # Optional: Create GitHub Release on tag push
+  # Create GitHub Release on tag push
   release:
     name: 🎉 Create GitHub Release
     runs-on: ubuntu-latest
@@ -199,7 +199,7 @@ jobs:
       - name: 📱 Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: 🏗️ Build Release APK for GitHub Release
+      - name: 🏗️ Build Release APK
         run: ./gradlew assembleRelease --no-daemon
 
       - name: 🎉 Create GitHub Release
@@ -210,7 +210,7 @@ jobs:
           body: |
             ## 🚀 SpeedTest ${{ github.ref_name }}
 
-            ### What's included:
+            ### Features:
             - ⚡ Real internet speed measurement (Download & Upload)
             - 📡 Ping & Jitter testing
             - 🎨 Custom animated speedometer gauge
@@ -222,8 +222,7 @@ jobs:
             2. Enable "Install from unknown sources" in Android Settings
             3. Open the APK file and install
 
-            ### 📋 Requirements:
-            - Android 7.0 (API 24) or higher
+            ### Requirements: Android 7.0+ (API 24)
           draft: false
           prerelease: false
         env:
