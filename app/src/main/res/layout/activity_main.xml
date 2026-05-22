@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,14 +12,14 @@
         android:orientation="vertical"
         android:paddingBottom="24dp">
 
-        <!-- Header -->
+        <!-- ── Header ── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingHorizontal="20dp"
             android:paddingTop="16dp"
-            android:paddingBottom="8dp"
+            android:paddingBottom="4dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -37,22 +36,129 @@
                 android:id="@+id/tvNetworkType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Wi-Fi"
+                android:text="—"
                 android:textColor="@color/accent_blue"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:background="@drawable/chip_bg"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="4dp"
                 tools:text="📶 Wi-Fi" />
         </LinearLayout>
 
-        <!-- Phase indicators -->
+        <!-- ── IP / ISP info card (always visible) ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:padding="14dp"
+            android:background="@drawable/card_bg">
+
+            <!-- Row 1: IP Address -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content"
+                    android:text="IP ADDRESS"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.08" />
+
+                <TextView
+                    android:id="@+id/tvIpAddress"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Detecting..."
+                    android:textColor="@color/accent_cyan"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="203.0.113.42" />
+            </LinearLayout>
+
+            <!-- Row 2: ISP -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content"
+                    android:text="ISP"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.08" />
+
+                <TextView
+                    android:id="@+id/tvIspName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Detecting..."
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    tools:text="Safaricom PLC" />
+            </LinearLayout>
+
+            <!-- Row 3: Location -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content"
+                    android:text="LOCATION"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.08" />
+
+                <TextView
+                    android:id="@+id/tvServerName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Detecting..."
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    tools:text="Nairobi, KE" />
+            </LinearLayout>
+
+            <!-- Row 4: ASN (hidden until known) -->
+            <TextView
+                android:id="@+id/tvAsn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
+                android:paddingTop="4dp"
+                android:visibility="gone"
+                tools:text="AS33771"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <!-- ── Phase indicators ── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingHorizontal="20dp"
-            android:paddingBottom="8dp"
+            android:paddingVertical="6dp"
             android:gravity="center">
 
             <LinearLayout
@@ -116,74 +222,74 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Speedometer -->
+        <!-- ── Speedometer ── -->
         <com.speedtest.app.SpeedometerView
             android:id="@+id/speedometer"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp" />
+            android:layout_height="280dp"
+            android:layout_marginHorizontal="16dp" />
 
-        <!-- Status text -->
+        <!-- Live speed number (shown during test) -->
+        <TextView
+            android:id="@+id/tvCurrentSpeed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0.0"
+            android:textColor="@color/accent_cyan"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:text="148.3 Mbps" />
+
+        <!-- Status label -->
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Tap START to begin"
             android:textColor="@color/text_secondary"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:gravity="center"
             android:paddingVertical="4dp" />
-
-        <!-- Current speed readout -->
-        <TextView
-            android:id="@+id/tvCurrentSpeed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="0.0"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:visibility="gone"
-            tools:visibility="visible" />
 
         <!-- Progress bar -->
         <ProgressBar
             android:id="@+id/progressBar"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
+            android:layout_height="5dp"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginVertical="8dp"
-            android:progress="0"
+            android:layout_marginVertical="6dp"
             android:max="100"
+            android:progress="0"
             android:progressTint="@color/accent_blue"
             android:progressBackgroundTint="@color/surface"
             android:indeterminateTint="@color/accent_blue" />
 
-        <!-- START Button -->
+        <!-- START / STOP button -->
         <Button
             android:id="@+id/btnStart"
             android:layout_width="160dp"
-            android:layout_height="56dp"
+            android:layout_height="52dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginVertical="12dp"
+            android:layout_marginVertical="10dp"
             android:text="START"
             android:textColor="@color/text_primary"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"
             android:background="@drawable/btn_start_bg"
-            android:elevation="8dp"
+            android:elevation="6dp"
             android:stateListAnimator="@null" />
 
-        <!-- Stats cards row -->
+        <!-- ── Stats cards row ── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp">
+            android:paddingVertical="6dp">
 
             <!-- Ping card -->
             <LinearLayout
@@ -193,23 +299,21 @@
                 android:layout_marginEnd="6dp"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="14dp"
+                android:padding="12dp"
                 android:background="@drawable/card_bg">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="PING"
                     android:textColor="@color/text_secondary"
-                    android:textSize="10sp"
-                    android:letterSpacing="0.1" />
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/tvPing"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="—"
                     android:textColor="@color/accent_cyan"
-                    android:textSize="22sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     tools:text="12ms" />
                 <TextView
@@ -230,23 +334,21 @@
                 android:layout_marginHorizontal="3dp"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="14dp"
+                android:padding="12dp"
                 android:background="@drawable/card_bg">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="↓ DOWNLOAD"
+                    android:text="↓ DOWN"
                     android:textColor="@color/text_secondary"
-                    android:textSize="10sp"
-                    android:letterSpacing="0.1" />
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/tvDownload"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="—"
                     android:textColor="@color/accent_blue"
-                    android:textSize="22sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     tools:text="245.8" />
                 <TextView
@@ -265,23 +367,21 @@
                 android:layout_marginStart="6dp"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="14dp"
+                android:padding="12dp"
                 android:background="@drawable/card_bg">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="↑ UPLOAD"
+                    android:text="↑ UP"
                     android:textColor="@color/text_secondary"
-                    android:textSize="10sp"
-                    android:letterSpacing="0.1" />
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/tvUpload"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="—"
                     android:textColor="@color/accent_purple"
-                    android:textSize="22sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     tools:text="89.3" />
                 <TextView
@@ -293,13 +393,13 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Results card (shown after test) -->
+        <!-- ── Results rating card ── -->
         <LinearLayout
             android:id="@+id/cardResults"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:orientation="vertical"
             android:padding="16dp"
             android:background="@drawable/card_bg"
@@ -312,66 +412,10 @@
                 android:layout_height="wrap_content"
                 android:text="🚀 EXCELLENT"
                 android:textColor="@color/accent_cyan"
-                android:textSize="18sp"
+                android:textSize="17sp"
                 android:textStyle="bold"
-                android:gravity="center"
-                android:paddingBottom="12dp" />
+                android:gravity="center" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/surface"
-                android:layout_marginBottom="12dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="SERVER"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="10sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvServerName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Detecting..."
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp"
-                        tools:text="New York, US" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ISP"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="10sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvIspName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Detecting..."
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp"
-                        tools:text="Comcast Cable" />
-                </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
